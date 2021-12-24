@@ -3,7 +3,6 @@ package com.example.flicker.activity
 import android.R
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Context
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -13,8 +12,6 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.flicker.databinding.ActivityMainBinding
 import com.example.flicker.model.Photo
@@ -31,7 +28,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var recyclerView: RecyclerView
     private lateinit var myAdapter: MyAdapter
-    private lateinit var myList: ArrayList<Photo>
+    private lateinit var imageList: ArrayList<Photo>
     private lateinit var searchText: String
 
     private val apiInterface by lazy { ApiClient().getClient().create(ApiInterface::class.java) }
@@ -58,18 +55,12 @@ class MainActivity : AppCompatActivity() {
                 parent: AdapterView<*>,
                 view: View, position: Int, id: Long
             ) {
-                Toast.makeText(
-                    this@MainActivity,
-                    "${list[position]}", Toast.LENGTH_SHORT
-                ).show()
-
                 if (list[position]!="+10") {
                     numberOfImage = list[position] as Int
                 } else {
                     numberOfImage = 0
                 }
             }
-
             override fun onNothingSelected(parent: AdapterView<*>?) {
 
             }
@@ -81,7 +72,7 @@ class MainActivity : AppCompatActivity() {
                 if (event?.action == KeyEvent.ACTION_DOWN &&
                     keyCode == KeyEvent.KEYCODE_ENTER
                 ) {
-                    myList = arrayListOf()
+                    imageList = arrayListOf()
                     searchText = binding.searchBar.text.toString()
                     getPhotos()
                     hideSoftKeyboard()
@@ -93,9 +84,12 @@ class MainActivity : AppCompatActivity() {
             }
         })
         binding.searchIcon.setOnClickListener {
-            myList = arrayListOf()
+            imageList = arrayListOf()
             searchText = binding.searchBar.text.toString()
             getPhotos()
+            hideSoftKeyboard()
+            binding.searchBar.clearFocus()
+            binding.searchBar.isCursorVisible = false
         }
 
         // Buttons Actions
@@ -127,13 +121,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUpRecyclerview() {
-        myList = arrayListOf()
+        imageList = arrayListOf()
         recyclerView = binding.recyclerview
-        myAdapter = MyAdapter(this, myList)
+        myAdapter = MyAdapter(this, imageList)
         recyclerView.adapter = myAdapter
     }
 
-    fun Activity.hideSoftKeyboard() {
+    private fun Activity.hideSoftKeyboard() {
         (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager).apply {
             hideSoftInputFromWindow(currentFocus?.windowToken, 0)
         }
@@ -153,12 +147,12 @@ class MainActivity : AppCompatActivity() {
 
                     if (numberOfImage != 0 ){
                         for (i in 1..numberOfImage){
-                            myList.add(photos[i])
+                            imageList.add(photos[i])
                         }
                     } else {
-                        myList = photos as ArrayList<Photo>
+                        imageList = photos as ArrayList<Photo>
                     }
-                    myAdapter.update(myList)
+                    myAdapter.update(imageList)
                     recyclerView.scheduleLayoutAnimation()
 
                 }

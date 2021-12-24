@@ -53,6 +53,7 @@ class MyAdapter(private val context: Context, private var photos: ArrayList<Phot
             val intent = Intent(context, DetailActivity::class.java)
             intent.putExtra("url_image", photo.url_h)
             intent.putExtra("title_image", photo.title)
+            intent.putExtra("tags_image", photo.tags)
             context.startActivity(intent)
 
         }
